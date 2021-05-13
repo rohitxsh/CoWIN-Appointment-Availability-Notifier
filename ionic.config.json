@@ -1,0 +1,7 @@
+{
+  "name": "CoWIN.A.A.N",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}

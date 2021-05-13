@@ -1,0 +1,73 @@
+#container {
+  text-align: left;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 15%;
+  margin: 5%;
+}
+
+#container strong {
+  font-size: 20px;
+  line-height: 26px;
+}
+
+#container p {
+  font-size: 16px;
+  line-height: 22px;
+
+  color: #8c8c8c;
+
+  margin: 0;
+}
+
+#container a {
+  text-decoration: none;
+}
+
+ion-title{
+  padding-inline: 0px !important;
+  text-align: left;
+}
+
+ion-header{
+  padding: 2% !important;
+  margin: 2% !important;
+}
+
+.loading-class {
+  --background: #222;
+  --spinner-color: #fff;
+
+  color: #fff;
+}
+
+.createAlert{
+  margin-top: 10%;
+}
+
+ion-label{
+  text-align: left;
+}
+
+.activeCard{
+  margin-top: 10%;
+}
+
+.updateTime{
+  margin-top: 10%;
+}
+
+.cowinUrl{
+  margin: 5%;
+}
+
+.fee_type{
+  margin-top: 2%;
+  margin-bottom: 2%;
+  margin-right: 5%;
+}
+
+ion-icon{
+  margin-inline: 0px !important;
+}

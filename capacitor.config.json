@@ -1,0 +1,13 @@
+{
+  "appId": "io.rohitxsh.caan",
+  "appName": "CoWIN.A.A.N",
+  "bundledWebRuntime": false,
+  "npmClient": "npm",
+  "webDir": "www",
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0
+    }
+  },
+  "cordova": {}
+}
