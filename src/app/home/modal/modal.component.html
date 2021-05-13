@@ -1,0 +1,67 @@
+<ion-header translucent>
+  <ion-toolbar>
+    <ion-title>Centers</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismissModal()">Close</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+
+<ion-content fullscreen>
+  <ion-searchbar (ionInput)="handleInput($event)" placeholder="Search by name, address, pincode, blockname or fee type..."></ion-searchbar>
+  <ion-list>
+    <ion-card *ngFor="let center of filteredData">
+      <ion-item class="ion-activated">
+        <ion-label>Name</ion-label>
+        <ion-chip color="primary">
+          <ion-label color="primary" (click)="chipClickHandler($event)" id="name"> {{ center['name'] }} </ion-label>
+        </ion-chip>
+      </ion-item>
+
+      <ion-item class="ion-activated">
+        <ion-label>Address</ion-label>
+        <ion-chip color="primary">
+          <ion-label color="primary" (click)="chipClickHandler($event)"> {{ center['address'] }} </ion-label>
+        </ion-chip>
+      </ion-item>
+
+      <ion-item class="ion-activated">
+        <ion-label>Block name</ion-label>
+        <ion-chip color="primary">
+          <ion-label color="primary" (click)="chipClickHandler($event)"> {{ center['block_name'] }} </ion-label>
+        </ion-chip>
+      </ion-item>
+
+      <ion-item class="ion-activated">
+        <ion-label>Pincode</ion-label>
+        <ion-chip color="primary">
+          <ion-label color="primary" (click)="chipClickHandler($event)"> {{ center['pincode'] }} </ion-label>
+        </ion-chip>
+      </ion-item>
+
+      <ion-item class="ion-activated">
+        <ion-label>From</ion-label>
+        <ion-chip color="primary">
+          <ion-label color="primary" (click)="chipClickHandler($event)"> {{ center['from'] }} </ion-label>
+        </ion-chip>
+      </ion-item>
+
+      <ion-item class="ion-activated">
+        <ion-label>To</ion-label>
+        <ion-chip color="primary">
+          <ion-label color="primary" (click)="chipClickHandler($event)"> {{ center['to'] }} </ion-label>
+        </ion-chip>
+      </ion-item>
+
+      <ion-item class="ion-activated">
+        <ion-label>Fee type</ion-label>
+        <ion-chip color="primary">
+          <ion-label color="primary" (click)="chipClickHandler($event)"> {{ center['fee_type'] }} </ion-label>
+        </ion-chip>
+      </ion-item>
+
+    </ion-card>
+  </ion-list>
+
+</ion-content>

@@ -8,6 +8,16 @@
 
 <ion-content [fullscreen]="true">
 
+  <ion-list class="theme-list" lines="full" class="themeSwitcher">
+    <ion-item>
+      <ion-icon slot="start" icon="moon" class="component-icon component-icon-dark"></ion-icon>
+      <ion-label>
+        Dark Mode
+      </ion-label>
+      <ion-toggle slot="end" (ionChange)="toggleDarkMode()"></ion-toggle>
+    </ion-item>
+  </ion-list>
+
   <div id="container" *ngIf="!isAlertActive">
     <ion-list>
       <ion-list-header>
@@ -26,14 +36,22 @@
         <ion-list>
           <ion-item>
             <ion-label>Districts</ion-label>
-            <ion-select interface="action-sheet" (ionChange)="setDistrict($event)" aria-required="required">
+            <ion-select interface="action-sheet" (ionChange)="setDistrict($event)">
               <ion-select-option *ngFor="let district of districts" [value]="district"> {{district.district_name}} </ion-select-option>
             </ion-select>
           </ion-item>
-        </ion-list>
+
         <ion-item>
           <ion-label>Date</ion-label>
           <ion-datetime displayFormat="DD-MM-YYYY" (ionChange)="setDate($event)"></ion-datetime>
+        </ion-item>
+        <ion-item>
+          <ion-label>Age limit</ion-label>
+        <ion-select interface="action-sheet" (ionChange)="ageSetter($event)" [value]=18>
+          <ion-select-option [value]=18> Only 18+ </ion-select-option>
+          <ion-select-option [value]=45> Only 45+ </ion-select-option>
+          <ion-select-option [value]=0> Show all </ion-select-option>
+        </ion-select>
         </ion-item>
         <ion-item>
           <ion-label class="fee_type"> Fee type </ion-label>
@@ -57,6 +75,7 @@
           <ion-label position="fixed">Sync every</ion-label>
           <ion-input type="number" value="15" (ionChange)="updateIntervalInfo($event)" required="true"></ion-input> minutes
         </ion-item>
+      </ion-list>
       </div>
 
       <div class="createAlert" *ngIf="isDistrictSelected && isDateSelected">
@@ -80,56 +99,56 @@
       <ion-item class="ion-activated">
         <ion-label>State</ion-label>
         <ion-chip color="primary">
-          <ion-label color="primary"> {{ data['state_name'] }} </ion-label>
+          <ion-label color="primary" (click)="chipClickHandler($event)"> {{ data['state_name'] }} </ion-label>
         </ion-chip>
       </ion-item>
 
       <ion-item class="ion-activated">
         <ion-label>District</ion-label>
         <ion-chip color="primary">
-          <ion-label color="primary"> {{ data['district_name'] }} </ion-label>
+          <ion-label color="primary" (click)="chipClickHandler($event)"> {{ data['district_name'] }} </ion-label>
         </ion-chip>
       </ion-item>
 
       <ion-item class="ion-activated">
         <ion-label>Start date</ion-label>
         <ion-chip color="primary">
-          <ion-label color="primary"> {{ data['startDate'] }} </ion-label>
+          <ion-label color="primary" (click)="chipClickHandler($event)"> {{ data['startDate'] }} </ion-label>
         </ion-chip>
       </ion-item>
 
       <ion-item class="ion-activated">
         <ion-label>End date</ion-label>
         <ion-chip color="primary">
-          <ion-label color="primary"> {{ data['endDate'] }} </ion-label>
+          <ion-label color="primary" (click)="chipClickHandler($event)"> {{ data['endDate'] }} </ion-label>
         </ion-chip>
       </ion-item>
 
       <ion-item class="ion-activated">
         <ion-label>Minimum age limit</ion-label>
         <ion-chip color="primary">
-          <ion-label color="primary"> {{ minimumAgeLimit }} </ion-label>
+          <ion-label color="primary" (click)="chipClickHandler($event)"> {{ ageElement(minimumAgeLimit) }} </ion-label>
         </ion-chip>
       </ion-item>
 
       <ion-item class="ion-activated">
         <ion-label>Fee type</ion-label>
         <ion-chip color="primary">
-          <ion-label color="primary"> {{ fee_type }} </ion-label>
+          <ion-label color="primary" (click)="chipClickHandler($event)"> {{ fee_type }} </ion-label>
         </ion-chip>
       </ion-item>
 
       <ion-item class="ion-activated">
         <ion-label>Update interval</ion-label>
         <ion-chip color="primary">
-          <ion-label color="primary"> {{ updateInterval }} min(s). </ion-label>
+          <ion-label color="primary" (click)="chipClickHandler($event)"> {{ updateInterval }} min(s). </ion-label>
         </ion-chip>
       </ion-item>
 
       <ion-item class="ion-activated">
         <ion-label>Test mode</ion-label>
         <ion-chip color="primary">
-          <ion-label color="primary"> {{ testMode.toString() }} </ion-label>
+          <ion-label color="primary" (click)="chipClickHandler($event)"> {{ testMode.toString() }} </ion-label>
         </ion-chip>
       </ion-item>
     </ion-card>
@@ -142,7 +161,7 @@
 
       <ion-item class="ion-activated">
         <ion-chip color="primary">
-          <ion-label color="primary"> {{ lastUpdateDate }} </ion-label>
+          <ion-label color="primary" (click)="chipClickHandler($event)"> {{ lastUpdateDate }} </ion-label>
         </ion-chip>
       </ion-item>
     </ion-card>
@@ -154,3 +173,16 @@
     </div>
   </div>
 </ion-content>
+
+<ion-footer *ngIf="(isDistrictSelected && isDateSelected) || isAlertActive">
+  <ion-toolbar>
+    <ion-title class="footerTitle">
+      <b>Show all centers</b>
+    </ion-title>
+    <ion-buttons slot="end" class="footerButton">
+      <ion-chip  color="dark" (click)="presentModal()">
+        <ion-icon name="triangle"></ion-icon>
+      </ion-chip>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-footer>

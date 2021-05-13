@@ -3,8 +3,7 @@
   position: absolute;
   left: 0;
   right: 0;
-  top: 15%;
-  margin: 5%;
+  margin: 5% !important;
 }
 
 #container strong {
@@ -70,4 +69,17 @@ ion-label{
 
 ion-icon{
   margin-inline: 0px !important;
+}
+
+.footerTitle{
+  margin-left: 8%;
+}
+
+.footerButton{
+  margin-right: 8%;
+}
+
+.themeSwitcher{
+  padding-left: 5%;
+  padding-right: 5%;
 }

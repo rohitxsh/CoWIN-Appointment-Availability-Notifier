@@ -2,7 +2,7 @@ import { Component, OnInit, Inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 
 import { Plugins } from '@capacitor/core';
-import { Platform, LoadingController, AlertController, PopoverController, ToastController } from '@ionic/angular';
+import { Platform, LoadingController, AlertController, PopoverController, ToastController, ModalController } from '@ionic/angular';
 import { LocalNotifications } from '@ionic-native/local-notifications/ngx';
 import { BackgroundMode } from '@ionic-native/background-mode/ngx';
 import { Autostart } from '@ionic-native/autostart/ngx';
@@ -11,6 +11,7 @@ import { PowerManagement } from '@ionic-native/power-management/ngx';
 import BackgroundFetch, { BackgroundFetchConfig } from 'cordova-plugin-background-fetch'
 
 import { PopoverComponent } from './popover/popover.component';
+import { ModalComponent } from './modal/modal.component';
 import { CowinService } from '../services/cowin.service';
 
 const { Storage } = Plugins;
@@ -49,13 +50,14 @@ export class HomePage implements OnInit {
   states = [];
   districts = [];
   data = {};
+  modalData = {};
   isStateSelected: boolean;
   isDistrictSelected: boolean;
   isDateSelected: boolean;
   testMode = true;
   fee_type = "any";
   updateInterval = 15;
-  minimumAgeLimit = "18+";
+  minimumAgeLimit = 18;
   flag = 0;
 
   subscription: Subscription;
@@ -74,6 +76,7 @@ export class HomePage implements OnInit {
     private powerManagement: PowerManagement,
     private popoverController: PopoverController,
     private toastController: ToastController,
+    private modalController: ModalController,
     @Inject(Autostart) private autostart: Autostart,
     @Inject(LocalNotifications) private localNotifications: LocalNotifications ) {}
 
@@ -89,11 +92,16 @@ export class HomePage implements OnInit {
       this.testMode = preferences.testMode;
       this.fee_type = preferences.fee_type;
       this.updateInterval = preferences.updateInterval;
+      this.minimumAgeLimit = preferences.minimumAgeLimit;
       this.alertServiceManager(this);
     }
     else{
       this.fetchStates();
     }
+  }
+
+  toggleDarkMode() {
+    document.body.classList.toggle('dark');
   }
 
   async createAlert(): Promise<void> {
@@ -104,7 +112,7 @@ export class HomePage implements OnInit {
     this.alert.present();
   }
 
-  async createLoading(message: string) {
+  async createLoading(message: string): Promise<void> {
     this.loading = await this.loadingController.create({
       cssClass: 'loading-class',
       message: message,
@@ -112,7 +120,7 @@ export class HomePage implements OnInit {
     this.loading.present();
   }
 
-  async presentPopover() {
+  async presentPopover(): Promise<void> {
     this.popover = await this.popoverController.create({
       component: PopoverComponent,
       translucent: true
@@ -120,7 +128,7 @@ export class HomePage implements OnInit {
     await this.popover.present();
   }
 
-  async presentToast(message: string, duration: number) {
+  async presentToast(message: string, duration: number): Promise<void> {
     this.toast = await this.toastController.create({
       message: message,
       duration: duration
@@ -128,6 +136,15 @@ export class HomePage implements OnInit {
     this.toast.present();
   }
 
+  async presentModal(): Promise<void> {
+    await this.createLoading('Loading...');
+    await this.cowinService.getCalendarByDistrict(this.district_id, this.startDate).toPromise().then((modalData)=>{ this.modalData = modalData });
+    const modal = await this.modalController.create({
+      component: ModalComponent,
+      componentProps: {data: this.modalData}
+    });
+    await modal.present().then(() => { this.loading.dismiss(); });
+  }
 
   async fetchStates(): Promise<void> {
     await this.createLoading('Loading list of states...');
@@ -188,13 +205,36 @@ export class HomePage implements OnInit {
     this.fee_type = event.detail.value;
   }
 
+  ageSetter(event: any){
+    this.minimumAgeLimit = (event.detail.value);
+  }
+
   updateIntervalInfo(event: any){
     this.updateInterval = parseInt(event.detail.value);
   }
 
+  ageElement(n: number){
+    if (!n) {
+      return "Show all"
+    }
+    else{
+      return "Only " + n.toString() + "+";
+    }
+  }
+
+  chipClickHandler(event: any){
+    this.presentToast(event.srcElement.innerHTML, 1000);
+  }
+
+  showNotification(data, sessions){
+    this.localNotifications.schedule({
+      id: Math.random()*100,
+      title: 'Slots available at ' + data.name,
+      text: 'Center name: ' + data.name + ", " + data.block_name + ', Date:' + sessions.date + ', Available capacity: ' + sessions.available_capacity + ', Vaccine: ' + sessions.vaccine + " [" + (new Date()).toString().split(" ")[4] + "]"
+    });
+  }
+
   async alertService(): Promise<void>{
-    console.log((new Date()).toString());
-    console.log();
     this.flag = 0;
     var apiData = JSON.parse((await Storage.get({ key: 'apiData' })).value);
     this.district_id = apiData.district_id;
@@ -203,6 +243,7 @@ export class HomePage implements OnInit {
     this.testMode = preferences.testMode;
     this.fee_type = preferences.fee_type;
     this.updateInterval = preferences.updateInterval;
+    this.minimumAgeLimit = preferences.minimumAgeLimit;
     this.subscription = this.cowinService.getCalendarByDistrict(this.district_id, this.startDate).subscribe(
       async (data) => {
         await Storage.set({
@@ -212,24 +253,33 @@ export class HomePage implements OnInit {
         this.lastUpdateDate = (new Date()).toString();
         for (let i = 0; i < data.length; i++) {
           for (let j = 0; j < data[i].sessions.length; j++) {
-            if(this.fee_type === 'any')
-            {
-              if (data[i].sessions[j].min_age_limit === 18 && data[i].sessions[j].available_capacity > 0) {
+            //fee type is any with age limit filer
+            if(this.fee_type === 'any' && this.minimumAgeLimit) {
+              if (data[i].sessions[j].min_age_limit === this.minimumAgeLimit && data[i].sessions[j].available_capacity > 0) {
                 this.flag++;
-                this.localNotifications.schedule({
-                  id: Math.random()*100,
-                  title: 'Slots available at ' + data[i].name + ", " + data[i].block_name + " [" + (new Date()).toString().split(" ")[4] + "]",
-                  text: 'Date:' + data[i].sessions[j].date + ', Available capacity: ' + data[i].sessions[j].available_capacity + ', Vaccine: ' + data[i].sessions[j].vaccine
-                });
+                this.showNotification(data[i], data[i].sessions[j]);
               }
             }
-            else if (data[i].sessions[j].min_age_limit === 18 && data[i].sessions[j].available_capacity > 0 && data[i].fee_type === this.fee_type){
+            //fee type is any and no age limit filer
+            else if(this.fee_type === 'any' && !this.minimumAgeLimit) {
+              if (data[i].sessions[j].available_capacity > 0) {
                 this.flag++;
-                this.localNotifications.schedule({
-                  id: Math.random()*100,
-                  title: 'Slots available at ' + data[i].name + ", " + data[i].block_name  + " [" + (new Date()).toString().split(" ")[4] + "]",
-                  text: 'Date:' + data[i].sessions[j].date + ', Available capacity: ' + data[i].sessions[j].available_capacity + ', Fee type: ' + data[i].fee_type + ', Vaccine: ' + data[i].sessions[j].vaccine
-                });
+                this.showNotification(data[i], data[i].sessions[j]);
+              }
+            }
+            //fee type is either free or paid with age limit filer
+            else if (!(this.fee_type === 'any') && this.minimumAgeLimit){
+              if (data[i].sessions[j].min_age_limit === this.minimumAgeLimit && data[i].sessions[j].available_capacity > 0 && data[i].fee_type === this.fee_type){
+                this.flag++;
+                this.showNotification(data[i], data[i].sessions[j]);
+              }
+            }
+            //fee type is either free or paid and no age limit filer
+            else if (!(this.fee_type === 'any') && !this.minimumAgeLimit){
+              if (data[i].sessions[j].available_capacity > 0 && data[i].fee_type === this.fee_type){
+                this.flag++;
+                this.showNotification(data[i], data[i].sessions[j]);
+              }
             }
           }
         }
@@ -294,7 +344,8 @@ export class HomePage implements OnInit {
         }, (this.updateInterval*60*1000));
       });
       this.backgroundModeSub = this.backgroundMode.on('activate').subscribe(() => {
-        this.backgroundMode.wakeUp();
+        //Turn screen on
+        // this.backgroundMode.wakeUp();
         // disableWebViewOptimizations is crashing the app if plugin is installed from https://github.com/katzer/cordova-plugin-background-mode
         // use https://bitbucket.org/TheBosZ/cordova-plugin-run-in-background/src/master/, few type definitions are missing
         this.backgroundMode.disableWebViewOptimizations();
@@ -357,7 +408,8 @@ export class HomePage implements OnInit {
       value: JSON.stringify({
         testMode: this.testMode,
         fee_type: this.fee_type,
-        updateInterval: this.updateInterval
+        updateInterval: this.updateInterval,
+        minimumAgeLimit: this.minimumAgeLimit
       }),
     });
     await Storage.set({
@@ -383,7 +435,7 @@ export class HomePage implements OnInit {
     }, 1000);
 
     if(!this.platform.is('ios')){
-      this.presentToast('Hi, please make sure the app is whitelisted in your battery saver settings. [Note: If the permanent service notification disappears that means the app was killed by your OS].', 6000);
+      this.presentToast('Please make sure the app is whitelisted in your battery saver settings. [Note: If the permanent service notification disappears that means the app was killed by your OS].', 6000);
     }
   }
 
@@ -412,6 +464,7 @@ export class HomePage implements OnInit {
     this.testMode = true;
     this.fee_type = "any";
     this.updateInterval = 15;
+    this.minimumAgeLimit = 18;
     this.fetchStates();
   }
 }
