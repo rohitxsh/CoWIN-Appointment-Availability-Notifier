@@ -21,11 +21,8 @@ export class ModalComponent implements OnInit {
   ngOnInit() {
     this.filteredData = this.data;
     for (let i = 0; i < this.data.length; i++) {
-      console.log(this.data[i].center_id);
-      console.log(this.data[i].sessions);
       this.modalData[this.data[i].center_id] = this.data[i].sessions;
     }
-    console.log(this.modalData);
   }
 
   dismissModal() {

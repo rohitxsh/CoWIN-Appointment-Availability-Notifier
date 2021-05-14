@@ -247,7 +247,7 @@ export class HomePage implements OnInit {
     this.localNotifications.schedule({
       id: Math.random()*100,
       title: 'Slots available at ' + data.name,
-      text: 'Center name: ' + data.name + ", " + data.block_name + ', Date:' + sessions.date + ', Available capacity: ' + sessions.available_capacity + ', Vaccine: ' + sessions.vaccine + " [" + (new Date()).toString().split(" ")[4] + "]"
+      text: 'Center name: ' + data.name + ", " + data.block_name + ', Date:' + sessions.date + ', Available capacity: ' + sessions.available_capacity + ', Minimum age limit: ' + sessions.min_age_limit + " [" + (new Date()).toString().split(" ")[4] + "]"
     });
   }
 

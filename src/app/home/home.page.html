@@ -33,7 +33,6 @@
       </ion-item>
 
       <div *ngIf="isStateSelected">
-        <ion-list>
           <ion-item>
             <ion-label>Districts</ion-label>
             <ion-select interface="action-sheet" (ionChange)="setDistrict($event)">
@@ -42,8 +41,12 @@
           </ion-item>
 
         <ion-item>
-          <ion-label>Date</ion-label>
+          <ion-label>Start Date</ion-label>
           <ion-datetime displayFormat="DD-MM-YYYY" (ionChange)="setDate($event)"></ion-datetime>
+        </ion-item>
+        <ion-item class="bottomBorderFix">
+          <ion-label>End Date</ion-label>
+          {{ endDate }}
         </ion-item>
         <ion-item>
           <ion-label>Age limit</ion-label>
@@ -53,8 +56,8 @@
           <ion-select-option [value]=0> Show all </ion-select-option>
         </ion-select>
         </ion-item>
-        <ion-item>
-          <ion-label class="fee_type"> Fee type </ion-label>
+        <ion-item class="bottomBorderFix">
+          <ion-label> Fee type </ion-label>
           <ion-segment scrollable (ionChange)="setFee($event)" value="any">
             <ion-segment-button value="any">
               <ion-label>Any</ion-label>
@@ -67,15 +70,14 @@
             </ion-segment-button>
           </ion-segment>
         </ion-item>
-        <ion-item>
-          <ion-label>Test mode <ion-chip color="primary" (click)="testModePopover()" outline><ion-icon name="alert-circle-outline" ></ion-icon></ion-chip></ion-label>
+        <ion-item class="bottomBorderFix">
+          <ion-label> Test mode <ion-chip color="primary" (click)="testModePopover()" outline><ion-icon name="alert-circle-outline" ></ion-icon></ion-chip></ion-label>
           <ion-toggle checked (ionChange)="setTestMode($event)"></ion-toggle>
         </ion-item>
         <ion-item>
           <ion-label position="fixed">Sync every</ion-label>
-          <ion-input type="number" value="15" (ionChange)="setupdateInterval($event)" required="true"></ion-input> minutes
+          <ion-input class="minutesInput" type="number" value="15" (ionChange)="setupdateInterval($event)" required="true"></ion-input> &nbsp; minutes
         </ion-item>
-      </ion-list>
       </div>
 
       <div class="createAlert" *ngIf="isStateSelected && isDistrictSelected && isDateSelected">
@@ -181,7 +183,7 @@
     </ion-title>
     <ion-buttons slot="end" class="footerButton">
       <ion-chip  color="dark" (click)="presentModal()">
-        <ion-icon name="chevron-up-sharp"></ion-icon>
+        &nbsp;&nbsp;<ion-icon name="chevron-up-sharp"></ion-icon>&nbsp;&nbsp;
       </ion-chip>
     </ion-buttons>
   </ion-toolbar>

@@ -55,12 +55,6 @@ ion-label{
   margin: 5%;
 }
 
-.fee_type{
-  margin-top: 2%;
-  margin-bottom: 2%;
-  margin-right: 5%;
-}
-
 ion-icon{
   margin-inline: 0px !important;
 }
@@ -76,4 +70,13 @@ ion-icon{
 .themeSwitcher{
   padding-left: 5%;
   padding-right: 5%;
+}
+
+.minutesInput{
+  text-align: right;
+}
+
+.bottomBorderFix{
+  --inner-border-width: 0 0 0px 0;
+  --border-width: 0 0 1px 0;
 }
