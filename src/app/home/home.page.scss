@@ -29,16 +29,10 @@ ion-title{
   text-align: left;
 }
 
-ion-header{
-  padding: 2% !important;
-  margin: 2% !important;
-}
-
-.loading-class {
-  --background: #222;
-  --spinner-color: #fff;
-
-  color: #fff;
+.headerTitle{
+  padding-inline: 5% !important;
+  padding-top: 2% !important;
+  padding-bottom: 2% !important;
 }
 
 .createAlert{

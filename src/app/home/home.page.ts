@@ -1,6 +1,6 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { Subscription } from 'rxjs';
 
+//ionic imports
 import { Plugins } from '@capacitor/core';
 import { Platform, LoadingController, AlertController, PopoverController, ToastController, ModalController } from '@ionic/angular';
 import { LocalNotifications } from '@ionic-native/local-notifications/ngx';
@@ -8,7 +8,11 @@ import { BackgroundMode } from '@ionic-native/background-mode/ngx';
 import { Autostart } from '@ionic-native/autostart/ngx';
 import { PowerManagement } from '@ionic-native/power-management/ngx';
 
+//cordova imports
 import BackgroundFetch, { BackgroundFetchConfig } from 'cordova-plugin-background-fetch'
+
+//interface
+import { State, District, Center } from '../services/cowin.model';
 
 import { PopoverComponent } from './popover/popover.component';
 import { ModalComponent } from './modal/modal.component';
@@ -24,8 +28,8 @@ const config_android: BackgroundFetchConfig = {
   forceAlarmManager: true,
   stopOnTerminate: false,
   startOnBoot: true,
-  //required, disabled for pwa testing
-  //requiredNetworkType: BackgroundFetch.NETWORK_TYPE_ANY,
+  //uncomment when configuring background fetch for android, commented out for PWA testing
+  // requiredNetworkType: BackgroundFetch.NETWORK_TYPE_ANY,
 }
 
 @Component({
@@ -34,37 +38,31 @@ const config_android: BackgroundFetchConfig = {
   styleUrls: ['home.page.scss'],
 })
 export class HomePage implements OnInit {
-  //data
+  //active alert data
   state_name: string;
-  district_id: string;
   district_name: string;
   startDate: string;
   endDate: string;
+  minimumAgeLimit = 18;
+  fee_type = "any";
+  updateInterval = 15;
+  testMode = true;
   lastUpdateDate: string;
 
+  //district_id + startDate for getCalendarByDistrict endpoint
+  district_id: string;
+
   isAlertActive = false;
-  alert: HTMLIonAlertElement;
   loading: HTMLIonLoadingElement;
-  popover: HTMLIonPopoverElement;
-  toast: HTMLIonToastElement;
-  states = [];
-  districts = [];
+  states: State[] = [];
+  districts: District[] = [];
   data = {};
-  modalData = {};
+  modalData: Center[] = [];
   isStateSelected: boolean;
   isDistrictSelected: boolean;
   isDateSelected: boolean;
-  testMode = true;
-  fee_type = "any";
-  updateInterval = 15;
-  minimumAgeLimit = 18;
   flag = 0;
 
-  subscription: Subscription;
-  backgroundTaskSub: Subscription;
-  backgroundModeSub: Subscription;
-  getStatesSub: Subscription;
-  getDistrictsSub: Subscription;
   serviceTask: any;
 
   constructor(
@@ -100,55 +98,68 @@ export class HomePage implements OnInit {
     }
   }
 
+  //dark mode
   toggleDarkMode() {
     document.body.classList.toggle('dark');
   }
 
   async createAlert(): Promise<void> {
-    this.alert = await this.alertController.create({
-      message: 'Unable to fetch update from CoWIN!',
+    const alert = await this.alertController.create({
+      message: 'Unable to fetch update from CoWIN, please try again later!',
       buttons: ['Close'],
     });
-    this.alert.present();
+    alert.present();
   }
 
   async createLoading(message: string): Promise<void> {
     this.loading = await this.loadingController.create({
-      cssClass: 'loading-class',
       message: message,
     });
     this.loading.present();
   }
 
   async presentPopover(): Promise<void> {
-    this.popover = await this.popoverController.create({
+    const popover = await this.popoverController.create({
       component: PopoverComponent,
       translucent: true
     });
-    await this.popover.present();
+    popover.present();
   }
 
   async presentToast(message: string, duration: number): Promise<void> {
-    this.toast = await this.toastController.create({
+    const toast = await this.toastController.create({
       message: message,
       duration: duration
     });
-    this.toast.present();
+    toast.present();
   }
 
   async presentModal(): Promise<void> {
-    await this.createLoading('Loading...');
-    await this.cowinService.getCalendarByDistrict(this.district_id, this.startDate).toPromise().then((modalData)=>{ this.modalData = modalData });
-    const modal = await this.modalController.create({
-      component: ModalComponent,
-      componentProps: {data: this.modalData}
+    await this.createLoading('Fetching latest info from CoWIN...');
+    this.modalData = [];
+    await this.cowinService.getCalendarByDistrict(this.district_id, this.startDate).toPromise().then(
+      (modalData) => {
+        this.modalData = modalData;
+      },
+      () => {
+        this.createAlert();
     });
-    await modal.present().then(() => { this.loading.dismiss(); });
+
+    if(this.modalData.length){
+      const modal = await this.modalController.create({
+        component: ModalComponent,
+        componentProps: { data: this.modalData }
+      });
+      await modal.present().then(() => { this.loading.dismiss(); });
+    }
+    else{
+      this.loading.dismiss();
+    }
   }
 
   async fetchStates(): Promise<void> {
     await this.createLoading('Loading list of states...');
-    this.getStatesSub = this.cowinService.getStates().subscribe(
+    this.cowinService.getStates().toPromise().then(
       (data) => {
         this.states = data;
         this.loading.dismiss();
@@ -157,6 +168,8 @@ export class HomePage implements OnInit {
         this.loading.dismiss();
         this.createAlert();
         this.states = [];
+        this.state_name = "";
+        this.isStateSelected = false;
       }
     );
   }
@@ -166,7 +179,7 @@ export class HomePage implements OnInit {
     this.isStateSelected = true;
     this.state_name = event.detail.value.state_name;
 
-    this.getDistrictsSub = this.cowinService.getDistricts(event.detail.value.state_id).subscribe(
+    this.cowinService.getDistricts(event.detail.value.state_id).toPromise().then(
       (data) => {
         this.districts = data;
         this.loading.dismiss();
@@ -175,6 +188,9 @@ export class HomePage implements OnInit {
         this.loading.dismiss();
         this.createAlert();
         this.districts = [];
+        this.district_id = "";
+        this.district_name = "";
+        this.isDistrictSelected = false;
       }
     );
   }
@@ -193,24 +209,29 @@ export class HomePage implements OnInit {
     this.endDate = ('0' + temp.getDate()).slice(-2) + '-' + ('0' + (temp.getMonth()+1)).slice(-2) + '-' + temp.getFullYear();
   }
 
-  async testInfo(): Promise<void>{
-    await this.presentPopover();
-  }
-
-  testToggle(event: any): void{
-    this.testMode = event.detail.checked;
-  }
-
-  segmentChanged(event: any){
-    this.fee_type = event.detail.value;
-  }
-
-  ageSetter(event: any){
+  setAge(event: any){
     this.minimumAgeLimit = (event.detail.value);
   }
 
-  updateIntervalInfo(event: any){
+  setFee(event: any){
+    this.fee_type = event.detail.value;
+  }
+
+  setTestMode(event: any): void{
+    this.testMode = event.detail.checked;
+  }
+
+  async testModePopover(): Promise<void>{
+    await this.presentPopover();
+  }
+
+  setupdateInterval(event: any){
     this.updateInterval = parseInt(event.detail.value);
+  }
+
+  //show toast with chip data
+  chipClickHandler(event: any){
+    this.presentToast(event.srcElement.innerHTML, 1000);
   }
 
   ageElement(n: number){
@@ -220,10 +241,6 @@ export class HomePage implements OnInit {
     else{
       return "Only " + n.toString() + "+";
     }
-  }
-
-  chipClickHandler(event: any){
-    this.presentToast(event.srcElement.innerHTML, 1000);
   }
 
   showNotification(data, sessions){
@@ -244,7 +261,7 @@ export class HomePage implements OnInit {
     this.fee_type = preferences.fee_type;
     this.updateInterval = preferences.updateInterval;
     this.minimumAgeLimit = preferences.minimumAgeLimit;
-    this.subscription = this.cowinService.getCalendarByDistrict(this.district_id, this.startDate).subscribe(
+    this.cowinService.getCalendarByDistrict(this.district_id, this.startDate).toPromise().then(
       async (data) => {
         await Storage.set({
             key: 'lastUpdateDate',
@@ -338,12 +355,12 @@ export class HomePage implements OnInit {
       });
 
       //background task configuration
-      this.backgroundTaskSub = this.backgroundMode.on('enable').subscribe(() => {
+      this.backgroundMode.on('enable').toPromise().then(() => {
         this.serviceTask = setInterval(function(){
           scopeOfThis.alertService();
         }, (this.updateInterval*60*1000));
       });
-      this.backgroundModeSub = this.backgroundMode.on('activate').subscribe(() => {
+      this.backgroundMode.on('activate').toPromise().then(() => {
         //Turn screen on
         // this.backgroundMode.wakeUp();
         // disableWebViewOptimizations is crashing the app if plugin is installed from https://github.com/katzer/cordova-plugin-background-mode
@@ -364,15 +381,6 @@ export class HomePage implements OnInit {
     });
 
     this.alertService();
-  }
-
-  saveAlertCheck() {
-    try{
-      if(this.updateInterval > 0 && this.updateInterval <= 60){
-        this.saveAlert();
-      }
-      else { this.presentToast('Sync interval should be between 0 to 60 min(s).', 2000); }
-    } catch { this.presentToast('Sync interval should be between 0 to 60 min(s).', 2000); }
   }
 
   async saveAlert(): Promise<void> {
@@ -417,10 +425,6 @@ export class HomePage implements OnInit {
       value: (new Date()).toString()
     });
 
-    //unsubscribe as these subscriptions are not required in active alert page
-    this.getStatesSub.unsubscribe();
-    this.getDistrictsSub.unsubscribe();
-
     //fetch data from storage before moving to active alert page
     this.data = JSON.parse((await Storage.get({ key: 'activeData' })).value);
     this.lastUpdateDate = (await Storage.get({ key: 'lastUpdateDate' })).value;
@@ -439,24 +443,27 @@ export class HomePage implements OnInit {
     }
   }
 
+  saveAlertCheck() {
+    try{
+      if(this.updateInterval > 0 && this.updateInterval <= 60){
+        this.saveAlert();
+      }
+      else { this.presentToast('Sync interval should be between 0 to 60 min(s).', 2000); }
+    } catch { this.presentToast('Sync interval should be between 0 to 60 min(s).', 2000); }
+  }
+
   async deleteAlert(){
     await Storage.clear();
-    try{
-      this.subscription.unsubscribe();
-      clearInterval(this.serviceTask);
-    }catch{}
+    clearInterval(this.serviceTask);
     if(this.platform.is('ios')){
       BackgroundFetch.stop();
     }
     else{
       this.powerManagement.release();
       this.backgroundMode.disable();
-      try{
-        this.backgroundTaskSub.unsubscribe();
-        this.backgroundModeSub.unsubscribe();
-      }catch{}
     }
     this.autostart.disable();
+    //reset all variables
     this.isStateSelected = false;
     this.isDistrictSelected = false;
     this.isDateSelected = false;

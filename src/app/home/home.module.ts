@@ -6,6 +6,7 @@ import { IonicModule } from '@ionic/angular';
 
 import { HomePage } from './home.page';
 import { ModalComponent } from './modal/modal.component'
+import { SessionModalComponent } from './session-modal/session-modal.component'
 import { PopoverComponent } from './popover/popover.component'
 
 import { HomePageRoutingModule } from './home-routing.module';
@@ -17,6 +18,6 @@ import { HomePageRoutingModule } from './home-routing.module';
     IonicModule,
     HomePageRoutingModule
   ],
-  declarations: [HomePage, ModalComponent, PopoverComponent]
+  declarations: [HomePage, ModalComponent, SessionModalComponent, PopoverComponent]
 })
 export class HomePageModule {}

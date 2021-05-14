@@ -9,59 +9,66 @@
 
 
 <ion-content fullscreen>
-  <ion-searchbar (ionInput)="handleInput($event)" placeholder="Search by name, address, pincode, blockname or fee type..."></ion-searchbar>
-  <ion-list>
-    <ion-card *ngFor="let center of filteredData">
+  <ion-searchbar (ionInput)="handleInput($event)" placeholder="Search by center details..."></ion-searchbar>
+  <ion-virtual-scroll [items]="filteredData">
+    <ion-card *virtualItem="let item;">
       <ion-item class="ion-activated">
-        <ion-label>Name</ion-label>
+        <ion-label class="label">Name</ion-label>
         <ion-chip color="primary">
-          <ion-label color="primary" (click)="chipClickHandler($event)" id="name"> {{ center['name'] }} </ion-label>
+          <ion-label color="primary" (click)="chipClickHandler($event)" id="name"> {{ item.name }} </ion-label>
         </ion-chip>
       </ion-item>
 
       <ion-item class="ion-activated">
-        <ion-label>Address</ion-label>
+        <ion-label class="label">Address</ion-label>
         <ion-chip color="primary">
-          <ion-label color="primary" (click)="chipClickHandler($event)"> {{ center['address'] }} </ion-label>
+          <ion-label color="primary" (click)="chipClickHandler($event)"> {{ item.address }} </ion-label>
         </ion-chip>
       </ion-item>
 
       <ion-item class="ion-activated">
-        <ion-label>Block name</ion-label>
+        <ion-label class="label">Block name</ion-label>
         <ion-chip color="primary">
-          <ion-label color="primary" (click)="chipClickHandler($event)"> {{ center['block_name'] }} </ion-label>
+          <ion-label color="primary" (click)="chipClickHandler($event)"> {{ item.block_name }} </ion-label>
         </ion-chip>
       </ion-item>
 
       <ion-item class="ion-activated">
-        <ion-label>Pincode</ion-label>
+        <ion-label class="label">Pincode</ion-label>
         <ion-chip color="primary">
-          <ion-label color="primary" (click)="chipClickHandler($event)"> {{ center['pincode'] }} </ion-label>
+          <ion-label color="primary" (click)="chipClickHandler($event)"> {{ item.pincode }} </ion-label>
         </ion-chip>
       </ion-item>
 
       <ion-item class="ion-activated">
-        <ion-label>From</ion-label>
+        <ion-label class="label" class="label">From</ion-label>
         <ion-chip color="primary">
-          <ion-label color="primary" (click)="chipClickHandler($event)"> {{ center['from'] }} </ion-label>
+          <ion-label color="primary" (click)="chipClickHandler($event)"> {{ item.from }} </ion-label>
         </ion-chip>
       </ion-item>
 
       <ion-item class="ion-activated">
-        <ion-label>To</ion-label>
+        <ion-label class="label">To</ion-label>
         <ion-chip color="primary">
-          <ion-label color="primary" (click)="chipClickHandler($event)"> {{ center['to'] }} </ion-label>
+          <ion-label color="primary" (click)="chipClickHandler($event)"> {{ item.to }} </ion-label>
         </ion-chip>
       </ion-item>
 
       <ion-item class="ion-activated">
-        <ion-label>Fee type</ion-label>
+        <ion-label class="label">Fee type</ion-label>
         <ion-chip color="primary">
-          <ion-label color="primary" (click)="chipClickHandler($event)"> {{ center['fee_type'] }} </ion-label>
+          <ion-label color="primary" (click)="chipClickHandler($event)"> {{ item.fee_type }} </ion-label>
+        </ion-chip>
+      </ion-item>
+
+      <ion-item class="ion-activated">
+        <ion-label class="label"> <b>Sessions</b> </ion-label>
+        <ion-chip color="dark" class="sessionChip" (click)="presentModal(item.center_id)">
+          <ion-icon name="chevron-forward-sharp"></ion-icon>
         </ion-chip>
       </ion-item>
 
     </ion-card>
-  </ion-list>
+  </ion-virtual-scroll>
 
 </ion-content>

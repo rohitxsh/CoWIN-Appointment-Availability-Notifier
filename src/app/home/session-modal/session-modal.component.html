@@ -1,0 +1,54 @@
+<ion-header translucent>
+  <ion-toolbar>
+    <ion-title>Sessions</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismissModal()">Close</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+
+<ion-content fullscreen>
+  <ion-virtual-scroll [items]="data">
+    <ion-card *virtualItem="let item;">
+      <ion-item class="ion-activated">
+        <ion-label class="label">Date</ion-label>
+        <ion-chip color="primary">
+          <ion-label color="primary" (click)="chipClickHandler($event)" id="name"> {{ item.date }} </ion-label>
+        </ion-chip>
+      </ion-item>
+
+      <ion-item class="ion-activated">
+        <ion-label class="label">Available capacity</ion-label>
+        <ion-chip color="primary">
+          <ion-label color="primary" (click)="chipClickHandler($event)"> {{ item.available_capacity }} </ion-label>
+        </ion-chip>
+      </ion-item>
+
+      <ion-item class="ion-activated">
+        <ion-label class="label">Min. age limit</ion-label>
+        <ion-chip color="primary">
+          <ion-label color="primary" (click)="chipClickHandler($event)"> {{ item.min_age_limit }} </ion-label>
+        </ion-chip>
+      </ion-item>
+
+      <ion-item class="ion-activated">
+        <ion-label class="label">Vaccine</ion-label>
+        <ion-chip color="primary">
+          <ion-label color="primary" (click)="chipClickHandler($event)"> {{ item.vaccine }} </ion-label>
+        </ion-chip>
+      </ion-item>
+
+      <ion-item class="ion-activated">
+        <ion-label class="label" class="label">Slots</ion-label>
+        <ion-label text-wrap class="ion-text-wrap">
+        <ion-chip color="primary" *ngFor="let slot of item.slots" slot="end">
+          <ion-label color="primary" (click)="chipClickHandler($event)"> {{ slot }} </ion-label>
+        </ion-chip>
+      </ion-label>
+      </ion-item>
+
+    </ion-card>
+  </ion-virtual-scroll>
+
+</ion-content>

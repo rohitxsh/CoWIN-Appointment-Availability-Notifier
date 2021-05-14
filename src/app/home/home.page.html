@@ -1,6 +1,6 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>
+    <ion-title class="headerTitle">
       <b>CoWIN <br /> Appointment Availability Notifier</b>
     </ion-title>
   </ion-toolbar>
@@ -12,7 +12,7 @@
     <ion-item>
       <ion-icon slot="start" icon="moon" class="component-icon component-icon-dark"></ion-icon>
       <ion-label>
-        Dark Mode
+        &nbsp;Dark Mode
       </ion-label>
       <ion-toggle slot="end" (ionChange)="toggleDarkMode()"></ion-toggle>
     </ion-item>
@@ -47,7 +47,7 @@
         </ion-item>
         <ion-item>
           <ion-label>Age limit</ion-label>
-        <ion-select interface="action-sheet" (ionChange)="ageSetter($event)" [value]=18>
+        <ion-select interface="action-sheet" (ionChange)="setAge($event)" [value]=18>
           <ion-select-option [value]=18> Only 18+ </ion-select-option>
           <ion-select-option [value]=45> Only 45+ </ion-select-option>
           <ion-select-option [value]=0> Show all </ion-select-option>
@@ -55,7 +55,7 @@
         </ion-item>
         <ion-item>
           <ion-label class="fee_type"> Fee type </ion-label>
-          <ion-segment scrollable (ionChange)="segmentChanged($event)" value="any">
+          <ion-segment scrollable (ionChange)="setFee($event)" value="any">
             <ion-segment-button value="any">
               <ion-label>Any</ion-label>
             </ion-segment-button>
@@ -68,17 +68,17 @@
           </ion-segment>
         </ion-item>
         <ion-item>
-          <ion-label>Test mode <ion-chip color="primary" (click)="testInfo()" outline><ion-icon name="alert-circle-outline" ></ion-icon></ion-chip></ion-label>
-          <ion-toggle checked (ionChange)="testToggle($event)"></ion-toggle>
+          <ion-label>Test mode <ion-chip color="primary" (click)="testModePopover()" outline><ion-icon name="alert-circle-outline" ></ion-icon></ion-chip></ion-label>
+          <ion-toggle checked (ionChange)="setTestMode($event)"></ion-toggle>
         </ion-item>
         <ion-item>
           <ion-label position="fixed">Sync every</ion-label>
-          <ion-input type="number" value="15" (ionChange)="updateIntervalInfo($event)" required="true"></ion-input> minutes
+          <ion-input type="number" value="15" (ionChange)="setupdateInterval($event)" required="true"></ion-input> minutes
         </ion-item>
       </ion-list>
       </div>
 
-      <div class="createAlert" *ngIf="isDistrictSelected && isDateSelected">
+      <div class="createAlert" *ngIf="isStateSelected && isDistrictSelected && isDateSelected">
         <ion-button expand="block" (click)="saveAlertCheck()">
           CREATE ALERT
         </ion-button>
@@ -90,7 +90,7 @@
     <ion-card>
       <ion-item class="ion-activated">
         <ion-icon name="alert-circle-outline" slot="start"></ion-icon>
-        <ion-label>Active alert's details</ion-label>
+        <ion-label>&nbsp;Active alert's details</ion-label>
         <ion-chip color="danger">
           <ion-label color="danger" (click)="deleteAlert()"> Delete </ion-label>
         </ion-chip>
@@ -156,7 +156,7 @@
     <ion-card class="updateTime">
       <ion-item class="ion-activated">
         <ion-icon name="alert-circle-outline" slot="start"></ion-icon>
-        <ion-label>Last synced</ion-label>
+        <ion-label>&nbsp;Last synced</ion-label>
       </ion-item>
 
       <ion-item class="ion-activated">
@@ -181,7 +181,7 @@
     </ion-title>
     <ion-buttons slot="end" class="footerButton">
       <ion-chip  color="dark" (click)="presentModal()">
-        <ion-icon name="triangle"></ion-icon>
+        <ion-icon name="chevron-up-sharp"></ion-icon>
       </ion-chip>
     </ion-buttons>
   </ion-toolbar>
