@@ -17,6 +17,7 @@ import { State, District, Center } from '../services/cowin.model';
 import { PopoverComponent } from './popover/popover.component';
 import { ModalComponent } from './modal/modal.component';
 import { CowinService } from '../services/cowin.service';
+import { Subscription } from 'rxjs';
 
 const { Storage } = Plugins;
 
@@ -62,6 +63,8 @@ export class HomePage implements OnInit {
   isDistrictSelected: boolean;
   isDateSelected: boolean;
   flag = 0;
+  bgEnableSub: Subscription;
+  bgActivateSub: Subscription
 
   serviceTask: any;
 
@@ -350,12 +353,12 @@ export class HomePage implements OnInit {
       });
 
       //background task configuration
-      this.backgroundMode.on('enable').toPromise().then(() => {
+      this.backgroundMode.on('enable').subscribe(() => {
         this.serviceTask = setInterval(function(){
           scopeOfThis.alertService();
         }, (this.updateInterval*60*1000));
       });
-      this.backgroundMode.on('activate').toPromise().then(() => {
+      this.backgroundMode.on('activate').subscribe(() => {
         //Turn screen on
         // this.backgroundMode.wakeUp();
         // disableWebViewOptimizations is crashing the app if plugin is installed from https://github.com/katzer/cordova-plugin-background-mode
@@ -437,14 +440,19 @@ export class HomePage implements OnInit {
     }, 1000);
 
     if(!this.platform.is('ios')){
-      this.presentToast('Please make sure the app is whitelisted in your battery saver settings. [Note: If the permanent service notification disappears that means the app was killed by your OS].', 6000);
+      this.presentToast('Please make sure the app is whitelisted in the battery saver settings. [Note: If the permanent service notification disappears that means the app was killed by the OS].', 6000);
     }
   }
 
   saveAlertCheck() {
     try{
       if(this.updateInterval > 0 && this.updateInterval <= 60){
-        this.saveAlert();
+        if(this.state_name && this.district_name && this.startDate) {
+          this.saveAlert();
+        }
+        else{
+          this.presentToast('Some error occurred, please try again later.', 2000);
+        }
       }
       else { this.presentToast('Sync interval should be between 0 to 60 min(s).', 2000); }
     } catch { this.presentToast('Sync interval should be between 0 to 60 min(s).', 2000); }
@@ -453,6 +461,10 @@ export class HomePage implements OnInit {
   async deleteAlert(){
     await Storage.clear();
     clearInterval(this.serviceTask);
+    try{
+      this.bgEnableSub.unsubscribe();
+      this.bgActivateSub.unsubscribe();
+    }catch{}
     if(this.platform.is('ios')){
       BackgroundFetch.stop();
     }
@@ -466,10 +478,22 @@ export class HomePage implements OnInit {
     this.isDistrictSelected = false;
     this.isDateSelected = false;
     this.isAlertActive = false;
-    this.testMode = true;
-    this.fee_type = "any";
-    this.updateInterval = 15;
+
     this.minimumAgeLimit = 18;
+    this.fee_type = "any";
+    this.testMode = true;
+    this.updateInterval = 15;
+
+    this.startDate = "";
+    this.endDate = "";
+
+    this.states = [];
+    this.districts = [];
+    this.state_name = "";
+    this.district_name = "";
+    this.endDate = "";
+    this.district_id = "";
+
     this.fetchStates();
   }
 }
