@@ -176,13 +176,13 @@
   </div>
 </ion-content>
 
-<ion-footer *ngIf="(isDistrictSelected && isDateSelected) || isAlertActive">
+<ion-footer *ngIf="(isStateSelected && isDistrictSelected && isDateSelected) || isAlertActive">
   <ion-toolbar>
     <ion-title class="footerTitle">
       <b>Show all centers</b>
     </ion-title>
     <ion-buttons slot="end" class="footerButton">
-      <ion-chip  color="dark" (click)="presentModal()">
+      <ion-chip color="dark" (click)="presentModal()">
         &nbsp;&nbsp;<ion-icon name="chevron-up-sharp"></ion-icon>&nbsp;&nbsp;
       </ion-chip>
     </ion-buttons>

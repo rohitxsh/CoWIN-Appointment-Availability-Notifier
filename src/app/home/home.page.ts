@@ -337,11 +337,6 @@ export class HomePage implements OnInit {
 
       this.backgroundMode.enable();
 
-      //acquire partial wakelock
-      this.powerManagement.dim();
-      //this will reacquire the wakelock upon app resume
-      this.powerManagement.setReleaseOnPause(false);
-
       //backgroundMode configurations
       this.backgroundMode.disableBatteryOptimizations();
       this.backgroundMode.excludeFromTaskList();
@@ -366,7 +361,10 @@ export class HomePage implements OnInit {
         // disableWebViewOptimizations is crashing the app if plugin is installed from https://github.com/katzer/cordova-plugin-background-mode
         // use https://bitbucket.org/TheBosZ/cordova-plugin-run-in-background/src/master/, few type definitions are missing
         this.backgroundMode.disableWebViewOptimizations();
-        //this.backgroundMode.wakeUp();
+        //acquire partial wakelock
+        this.powerManagement.dim();
+        //this will reacquire the wakelock upon app resume
+        this.powerManagement.setReleaseOnPause(false);
       });
 
     }
