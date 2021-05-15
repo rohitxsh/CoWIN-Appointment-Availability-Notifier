@@ -53,6 +53,7 @@ export class HomePage implements OnInit {
   //district_id + startDate for getCalendarByDistrict endpoint
   district_id: string;
 
+  updateIntervalMin: number;
   isAlertActive = false;
   loading: HTMLIonLoadingElement;
   states: State[] = [];
@@ -445,8 +446,9 @@ export class HomePage implements OnInit {
   }
 
   saveAlertCheck() {
+    this.updateIntervalMin = this.platform.is('ios') ? 15 : 1;
     try{
-      if(this.updateInterval > 0 && this.updateInterval <= 60){
+      if(this.updateInterval >= this.updateIntervalMin && this.updateInterval <= 60){
         if(this.state_name && this.district_name && this.startDate) {
           this.saveAlert();
         }
@@ -454,8 +456,8 @@ export class HomePage implements OnInit {
           this.presentToast('Some error occurred, please try again later.', 2000);
         }
       }
-      else { this.presentToast('Sync interval should be between 0 to 60 min(s).', 2000); }
-    } catch { this.presentToast('Sync interval should be between 0 to 60 min(s).', 2000); }
+      else { this.presentToast('Sync interval should be between ' + this.updateIntervalMin + ' to 60 min(s).', 2000); }
+    } catch { this.presentToast('Sync interval should be between ' + this.updateIntervalMin + ' to 60 min(s).', 2000); }
   }
 
   async deleteAlert(){
