@@ -353,12 +353,12 @@ export class HomePage implements OnInit {
       });
 
       //background task configuration
-      this.backgroundMode.on('enable').subscribe(() => {
+      this.bgEnableSub = this.backgroundMode.on('enable').subscribe(() => {
         this.serviceTask = setInterval(function(){
           scopeOfThis.alertService();
         }, (this.updateInterval*60*1000));
       });
-      this.backgroundMode.on('activate').subscribe(() => {
+      this.bgActivateSub = this.backgroundMode.on('activate').subscribe(() => {
         //Turn screen on
         // this.backgroundMode.wakeUp();
         // disableWebViewOptimizations is crashing the app if plugin is installed from https://github.com/katzer/cordova-plugin-background-mode
